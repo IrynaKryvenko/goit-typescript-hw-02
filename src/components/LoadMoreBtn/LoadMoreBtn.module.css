@@ -1,0 +1,28 @@
+.btn {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding: 12px 8px;
+    border: none;
+    border-radius: 8px;
+
+    min-width: 120px;
+    color: green;
+    font-size: 18px;
+    background-color: aquamarine;
+    transition:
+        color 250ms linear,
+        background-color 250ms linear;
+}
+
+.btn:hover,
+.btn:focus {
+    background-color: green;
+    color: aquamarine;
+}
+
+.btn:disabled {
+    background-color: rgba(232, 236, 241);
+    ;
+}
