@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+
 import { ClickLoadMoreBtn } from "../../types";
 import css from "./LoadMoreBtn.module.css";
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import SearchBar from "./components/SearchBar/SearchBar";
-import { getImgs } from "./js/unsplash-api";
+import { getImgs } from "./js/api";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import Loader from "./components/Loader/Loader";
@@ -19,27 +19,31 @@ const App = function () {
   const [page, setPage] = useState<number>(1);
   const [imgs, setImgs] = useState<Img[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<unknown>(null); // maybe other type
+  const [error, setError] = useState<unknown>(null);
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
   const [isShowBtnLoadMore, setIsShowBtnLoadMore] = useState<boolean>(false);
-
   const [showModal, setShowModal] = useState<boolean>(false);
   const [imageCard, setImageCard] = useState<Img | null>(null);
 
+  // Fetch images when query or page changes
   useEffect(() => {
     if (!query) return;
     const fetchImgs = async () => {
       setLoading(true);
+      setError(null); // Reset error state on new fetch
       try {
         const { results, total_pages } = await getImgs(query, page);
 
         if (!results.length) {
-          return setIsEmpty(true);
+          setIsEmpty(true);
+          return;
         }
+
         setImgs((prevImgs) => [...prevImgs, ...results]);
         setIsShowBtnLoadMore(page < total_pages);
-      } catch (error) {
-        setError(error);
+      } catch (err) {
+        console.error("Error fetching images:", err);
+        setError(err);
       } finally {
         setLoading(false);
       }
@@ -48,17 +52,18 @@ const App = function () {
     fetchImgs();
   }, [page, query]);
 
+  // Handle search bar submission
   const handleSubmitSearchBar: SubmitSearchBar = (querySearchBar) => {
     if (!querySearchBar.trim()) return;
-
     setQuery(querySearchBar);
-    setImgs([]);
+    setImgs([]); // Clear images for new search
     setPage(1);
     setError(null);
     setIsShowBtnLoadMore(false);
     setIsEmpty(false);
   };
 
+  // Handle "load more" button click
   const handleClickLoadMoreBtn: ClickLoadMoreBtn = (heightForScroll) => {
     setTimeout(() => {
       window.scrollBy({
@@ -66,9 +71,10 @@ const App = function () {
         behavior: "smooth",
       });
     }, 1300);
-    return setPage((prevPage) => prevPage + 1);
+    setPage((prevPage) => prevPage + 1);
   };
 
+  // Open and close modal
   const openModal: OpenModal = (image) => {
     setImageCard(image);
     setShowModal(true);
@@ -85,19 +91,26 @@ const App = function () {
     <>
       <SearchBar onSubmit={handleSubmitSearchBar} />
 
+      {/* Render image gallery */}
       {imgs.length > 0 && <ImageGallery imgs={imgs} openModal={openModal} />}
 
+      {/* Render loader while fetching */}
       {loading && <Loader />}
 
-      {error !== null && <ErrorMessage text={"❌ Something went wrong"} />}
-      {isEmpty && <ErrorMessage text={"Sorry. There are no images ... 😭"} />}
+      {/* Render error message if any */}
+      {error && <ErrorMessage text="❌ Something went wrong" />}
+      
+      {/* Render empty message if no images found */}
+      {isEmpty && <ErrorMessage text="Sorry. There are no images ... 😭" />}
 
+      {/* Render "Load More" button */}
       {isShowBtnLoadMore && (
         <LoadMoreBtn onClick={handleClickLoadMoreBtn} disabled={loading}>
           {loading ? "Loading..." : "Load more"}
         </LoadMoreBtn>
       )}
 
+      {/* Render modal */}
       {showModal && imageCard && (
         <ImageModal
           showModal={showModal}

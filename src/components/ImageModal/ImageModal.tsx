@@ -1,5 +1,5 @@
-import ReactModal from "react-modal";
-import css from "./ImageModal.module.css";
+import ReactModal from 'react-modal';
+import css from "./ImageModl.module.css";
 import { CloseModal, Img } from "../../types";
 
 interface ImageModalProps {
